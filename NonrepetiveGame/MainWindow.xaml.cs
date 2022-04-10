@@ -100,7 +100,7 @@ namespace NonrepetiveGame
                 WinInfoBox.Text = _playerWon;
             }
 
-            if(CheckForRepetition(out int repetitionLength))
+            if(CheckForRepetition(_model.Word, out int repetitionLength))
             {
                 _model.IsGameOver = true;
                 WinInfoBox.Text = _computerWon;
@@ -119,17 +119,17 @@ namespace NonrepetiveGame
         /// Checks if repetition occured
         /// </summary>
         /// <returns>If repetition occured</returns>
-        private bool CheckForRepetition(out int repetitionLength)
+        private bool CheckForRepetition(string word, out int repetitionLength)
         {
             repetitionLength = 0;
 
             // We check repetitions of length (of one half) from 2 to n/2
-            for (int i = 2; i <= _model.Word.Length/2; i++ )
+            for (int i = 2; i <= word.Length / 2; i++)
             {
                 repetitionLength = i;
                 // We care only about repetitions contaiing the last letter, since repetitions in previous part of the word were checked already
-                string left = _model.Word.Substring(_model.Word.Length - 2 * i, i);
-                string right = _model.Word.Substring(_model.Word.Length - i, i);
+                string left = word.Substring(word.Length - 2 * i, i);
+                string right = word.Substring(word.Length - i, i);
                 if (left == right)
                     return true;
             }
@@ -168,11 +168,69 @@ namespace NonrepetiveGame
             {
                 sum += i;
             }
-
-            _model.Word += _model.Characters.GetRandomElement();
+            
+            int finishInOneMoveIndex = CheckIfCanFinishInOneMove();
+            if (finishInOneMoveIndex != -1)
+            {
+                _model.Word += _model.Characters[finishInOneMoveIndex];
+            }
+            else
+            {
+                int[] allPossibleMoves = CheckAllPossibilities(_model.AiMovesAhead, _model.Word);
+                int bestMove = 0;
+                int bestMoveIndex = 0;
+                for (int i = 0; i < allPossibleMoves.Length; i++)
+                {
+                    if (allPossibleMoves[i] > bestMove)
+                    {
+                        bestMove = allPossibleMoves[i];
+                        bestMoveIndex = i;
+                    }
+                }
+                _model.Word += _model.Characters[bestMoveIndex];
+            }
 
             CheckForFinish();
             _model.IsAiTurn = false;
+        }
+
+        private int[] CheckAllPossibilities(int length, string word)
+        {
+            if (length == 1)
+            {
+                int[] tab = new int[_model.Characters.Count];
+                for (int i = 0; i < _model.Characters.Count; i++)
+                {
+                    if(CheckForRepetition(word + _model.Characters[i], out int repetitionLengtht))
+                    {
+                        tab[i]++;
+                    }
+                }
+                return tab;
+            }
+            int[] tab2 = new int[_model.Characters.Count];
+
+            for (int i = 0; i < _model.Characters.Count; i++)
+            {
+                int[] t1 = CheckAllPossibilities(length - 1, word + _model.Characters[i]);
+                for (int j=0; j<_model.Characters.Count; j++)
+                {
+                    tab2[i] += t1[j];
+                }
+            }
+            return tab2;
+        }
+
+        private int CheckIfCanFinishInOneMove()
+        {
+            for (int i = 0; i < _model.Characters.Count; i++)
+            {
+                if (CheckForRepetition(_model.Word + _model.Characters[i], out int repetitionLengtht))
+                {
+                    return i;
+                }
+            }
+            return -1;
         }
     }
 }
