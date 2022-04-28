@@ -158,25 +158,15 @@ namespace NonrepetiveGame
 
         /// <summary>
         /// Processes the AI turn by adding its character and checking if game is finished
-        /// 
-        /// <para>TODO: Implement AI strategy</para>
         /// </summary>
         private async void ProcessAITurn()
         {
-            //TODO: Add AI logic
             _model.IsAiTurn = true;
 
             //This one is kinda important, without it (or if value is low enough) the window won't redraw until AI stops their move,
             //  so we won't be able to show in any way that player cannot input anything. This delay must basically be enough to disable
             //  buttons (and other things) that we want to disable
             await Task.Delay(50); 
-
-            //Simulate delay
-            long sum = 0;
-            for (int i = 0; i < 10e7; i++)
-            {
-                sum += i;
-            }
             
             int finishInOneMoveIndex = CheckIfCanFinishInOneMove();
             if (finishInOneMoveIndex != -1)
@@ -224,7 +214,7 @@ namespace NonrepetiveGame
                 int[] t1 = CheckAllPossibilities(length - 1, word + _model.Characters[i]);
                 for (int j=0; j<_model.Characters.Count; j++)
                 {
-                    tab2[i] += t1[j];
+                    tab2[i] += length * t1[j];
                 }
             }
             return tab2;
