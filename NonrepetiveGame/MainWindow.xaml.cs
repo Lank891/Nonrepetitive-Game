@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -108,8 +109,16 @@ namespace NonrepetiveGame
                 // TODO: Use those parts to show the repetition nicely
                 string nonRepeatedPart = _model.Word[..^(2 * repetitionLength)];
                 string repeatedPart = _model.Word[^repetitionLength..];
+                WordDisplay.Text = nonRepeatedPart;
+                WordDisplay.Text += repeatedPart;
+                WordDisplay.Text += repeatedPart;
+                WordDisplay.Focus();
+                WordDisplay.SelectionStart = nonRepeatedPart.Length;
+                WordDisplay.SelectionLength = repeatedPart.Length*2;
+                WordDisplay.Select(nonRepeatedPart.Length, repeatedPart.Length * 2);
+                WordDisplay.SelectionTextBrush = System.Windows.Media.Brushes.Red;
                 // Word = nonRepeatedPart + repeatedPart + repeatedPart
-                
+
                 // Won't work for long repetition, ideally it should be shown somehow in text box where the word is
                 WinInfoBox.Text += " Repeated part: " + repeatedPart;
             }
